@@ -1,0 +1,32 @@
+# LaTeX auxiliary files
+*.aux
+*.log
+*.bbl
+*.blg
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+*.out
+*.toc
+*.lof
+*.lot
+*.idx
+*.ind
+*.ilg
+*.glg
+*.glo
+*.gls
+*.ist
+*.acn
+*.acr
+*.alg
+
+# Output directory
+output/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# VS Code workspace settings (optional — remove this line if you want to track .vscode/)
+.vscode/
