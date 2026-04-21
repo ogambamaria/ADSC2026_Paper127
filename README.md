@@ -63,14 +63,16 @@ Better BibTeX (BBT) handles the automatic, continuous export of your Zotero libr
 
 ### Overview
 
-All three contributors share a single **Zotero Group Library**. References are added to the group collection by any contributor, but `references/references.bib` is updated and committed following a controlled manual export process. This prevents one contributor's export from silently overwriting another's additions.
+Each contributor maintains a **personal `.bib` file** that auto-exports from their local Zotero library. This eliminates merge conflicts during active writing. When work is ready for integration, references are promoted to the shared `references/references.bib` via a manual export from the group library.
 
-IEEE uses **numeric citations** rendered as `[1]`, `[2]`, etc. Citation order in the compiled document is determined by order of appearance in the text. The bibliography style is set in `main.tex` and must not be changed:
+IEEE uses numeric citations rendered as `[1]`, `[2]`, etc. The bibliography style is fixed in `main.tex` and must not be changed:
 
 ```latex
 \bibliographystyle{IEEEtran}
 \bibliography{IEEEabrv,references/references}
 ```
+
+During the personal workflow phase, each contributor temporarily points their local build at their own `.bib` file. The `main.tex` on `main` branch always references `references/references.bib`.
 
 ---
 
@@ -78,59 +80,76 @@ IEEE uses **numeric citations** rendered as `[1]`, `[2]`, etc. Citation order in
 
 #### 1. Join the Zotero Group Library
 
-All contributors must have a Zotero account and be members of the shared group. Accept the invitation at [https://www.zotero.org/groups/6493800/adsc2026](https://www.zotero.org/groups/6493800/adsc2026). The group library will appear in the left panel of Zotero under **Group Libraries**.
+Accept the invitation at [https://www.zotero.org/groups/6493800/adsc2026](https://www.zotero.org/groups/6493800/adsc2026). The group library appears in the Zotero left panel under **Group Libraries**.
 
 #### 2. Install Better BibTeX
 
 Download and install from [https://retorque.re/zotero-better-bibtex/installation/](https://retorque.re/zotero-better-bibtex/installation/).
 
-Better BibTeX (BBT) assigns stable, human-readable citation keys to each item (e.g., `smith2023climate`) and handles export to `.bib` format. BBT is compatible with Zotero 8 and above.
-
-#### 3. Do Not Configure AutoExport
-
-Do not use BBT's AutoExport (`Keep updated`) on this project. With multiple contributors on different machines, AutoExport causes each machine to independently overwrite `references/references.bib` on every library change, producing conflicts. Use the manual export process below instead.
+BBT assigns stable citation keys (e.g., `smith2023climate`) and handles auto-export to `.bib` format.
 
 ---
 
-### Adding References
+#### Configuring AutoExport in BBT
 
-Add references to the **shared group collection** only — not your personal Zotero library. Items added to personal libraries are not visible to other contributors and will not appear in the shared export.
+1. In Zotero, right-click the collection → `Export Collection`.
+2. Format: `Better BibTeX`.
+3. Check `Keep updated`.
+4. Set the export path to your named file, e.g., `references/maria.bib`, inside the repository root.
 
-References can be added via:
-- The Zotero browser connector
-- DOI or ISBN lookup (`File` → `Import by Identifier`)
-- Manual entry
+BBT will now update your file automatically whenever your local Zotero library changes. No manual export step is required during writing.
+
+#### Local build configuration
+
+On your working branch, temporarily adjust the bibliography command in your local `main.tex` to include your personal file:
+
+```latex
+\bibliography{IEEEabrv,references/maria,references/references}
+```
+
+LaTeX resolves citation keys across all listed `.bib` files. Keys present in your personal file but not yet in `references/references.bib` will resolve correctly in local builds.
+
+Do not commit this change. Revert `main.tex` to the canonical bibliography command before opening a pull request.
 
 ---
 
-### Updating `references/references.bib`
+### Adding References During Writing
 
-Run this sequence every time you add new references and need to commit them to the repository:
+Add references to your **personal Zotero collection**. BBT exports them automatically to your `[firstname].bib`. They are immediately available for citation in your local build.
+
+Do not add to the group collection during active writing. The group collection is the source for the shared file and should only receive entries that are ready for integration.
+
+---
+
+### Promoting References to the Shared File
+
+Run this sequence when a section is ready for PR or when coordinating a merge with other contributors.
+
+#### Step 1 — Add your references to the group collection
+
+In Zotero, drag the relevant items from your personal collection into the group collection. Verify sync has completed (`Edit` → `Sync` or the toolbar sync icon) before proceeding.
+
+#### Step 2 — Export from the group collection
+
+1. Right-click the group collection → `Export Collection`.
+2. Format: `Better BibTeX`.
+3. Leave `Keep updated` unchecked.
+4. Set the export path to `references/references.bib` in the repository root.
+
+#### Step 3 — Commit on a dedicated branch
 
 ```bash
 git checkout main
 git pull origin main
-git checkout -b refs/add-your-description
-```
-
-Then export from Zotero:
-
-1. Right-click the group collection in Zotero → `Export Collection`
-2. Format: `Better BibTeX`
-3. Leave `Keep updated` unchecked
-4. Set the export path to `references/references.bib` in the repository root
-
-Then commit and open a PR:
-
-```bash
+git checkout -b refs/promote-[your-description]
 git add references/references.bib
-git commit -m "refs: add sources for [section name]"
-git push origin refs/add-your-description
+git commit -m "refs: promote references for [section name]"
+git push origin refs/promote-[your-description]
 ```
 
-Open a pull request as normal. Do not update `references/references.bib` directly on `main`.
+Open a pull request as normal. One reviewer must approve before merge.
 
-> Before exporting, confirm Zotero has fully synced the group library (`Edit` → `Sync` or the sync icon in the toolbar). Exporting before a sync completes will produce an incomplete `.bib` file.
+> Confirm all contributors have synced the group library before exporting. Exporting before a sync completes produces an incomplete `.bib` file.
 
 ---
 
@@ -144,7 +163,20 @@ With Zotero running and the VS Code Zotero extension installed:
 4. Search by title, author, or year.
 5. Select the item — the citation key is inserted as `\cite{key}`.
 
-> Zotero must be open and running for the citation picker to function. The item must exist in the group collection, not only in a personal library, to guarantee it is present in `references/references.bib`.
+The item must exist in your personal collection (for local builds) or the group collection (for shared builds). Items in personal Zotero libraries not mirrored in either place will not resolve in a collaborator's build.
+
+---
+
+### Phase Transition: Switch to Group-Only Workflow
+
+When the draft stabilises and active per-contributor writing ends, the project switches to group-only reference management:
+
+1. All contributors promote remaining personal references to the group collection and verify sync.
+2. One contributor performs a final export from the group collection to `references/references.bib` and opens a PR.
+3. After merge, the `gitignore` rule for `references/refs-*.bib` can remain in place — personal files are simply no longer updated or used.
+4. Going forward, all new references are added directly to the group collection and promoted via the manual export process above.
+
+The bibliography command in `main.tex` on `main` requires no changes — it already points to `references/references.bib`.
 
 ---
 
