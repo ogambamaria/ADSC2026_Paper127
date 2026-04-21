@@ -154,44 +154,12 @@ With Zotero running and the VS Code Zotero extension installed:
 
 All work must be done on a **dedicated branch**. Direct commits to `main` are not permitted.
 
-**Branch naming convention:**
-
-```
-<type>/<short-description>
-```
-
-Examples:
-
-```
-feature/add-methodology-section
-fix/bibliography-formatting
-draft/literature-review-v2
-revision/reviewer-comments-round1
-```
-
-Branch types:
-
-| Prefix | Purpose |
-|--------|---------|
-| `feature/` | New content, sections, or figures |
-| `fix/` | Corrections to existing content or build errors |
-| `draft/` | In-progress writing not ready for review |
-| `revision/` | Changes in response to review or feedback |
-
-### Creating a Branch
-
-```bash
-git checkout main
-git pull origin main
-git checkout -b feature/your-branch-name
-```
-
 ### Committing Work
 
 ```bash
 git add .
 git commit -m "Descriptive message of what changed"
-git push origin feature/your-branch-name
+git push origin your-branch-name
 ```
 
 ### Pull Requests
